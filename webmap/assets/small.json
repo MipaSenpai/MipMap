@@ -1,0 +1,8 @@
+{
+  "name": "small",
+  "blocks": [
+    { "x": 0, "z": 0, "block_type": "grass_block" },
+    { "x": 1, "z": 0, "block_type": "dirt" },
+    { "x": 0, "z": 1, "block_type": "water" }
+  ]
+}
