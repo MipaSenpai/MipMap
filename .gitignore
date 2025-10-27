@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+dynmap
 
 # C extensions
 *.so
@@ -25,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.venv
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
