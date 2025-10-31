@@ -8,8 +8,6 @@ from endstone.event import event_handler, ChunkLoadEvent
 def sendChunkData(queue: mp.Queue, config: dict) -> None:
     while True:
         chunkData = queue.get()
-        print(chunkData)
-
         try:
             requests.post(config.get("mapUrl"), json=chunkData, timeout=5)
         except Exception as e:
