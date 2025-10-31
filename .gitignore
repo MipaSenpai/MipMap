@@ -13,6 +13,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+bedrock_server/
 eggs/
 .eggs/
 lib/
