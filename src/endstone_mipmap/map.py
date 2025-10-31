@@ -8,6 +8,8 @@ from endstone.event import event_handler, ChunkLoadEvent
 def sendChunkData(queue: mp.Queue, config: dict) -> None:
     while True:
         chunkData = queue.get()
+        print(chunkData)
+
         try:
             requests.post(config.get("mapUrl"), json=chunkData, timeout=5)
         except Exception as e:
@@ -16,6 +18,20 @@ def sendChunkData(queue: mp.Queue, config: dict) -> None:
 
 class Map(Plugin):
     api_version = "0.10"
+    
+    def on_load(self) -> None:
+        print("        ___                       ___         ___           ___           ___    ")
+        print("       /\  \                     /\  \       /\  \         /\  \         /\  \   ")
+        print("      |::\  \       ___         /::\  \     |::\  \       /::\  \       /::\  \  ")
+        print("      |:|:\  \     /\__\       /:/\:\__\    |:|:\  \     /:/\:\  \     /:/\:\__\ ")
+        print("    __|:|\:\  \   /:/__/      /:/ /:/  /  __|:|\:\  \   /:/ /::\  \   /:/ /:/  / ")
+        print("   /::::|_\:\__\ /::\  \     /:/_/:/  /  /::::|_\:\__\ /:/_/:/\:\__\ /:/_/:/  /  ")
+        print("   \:\~~\  \/__/ \/\:\  \__  \:\/:/  /   \:\~~\  \/__/ \:\/:/  \/__/ \:\/:/  /   ")
+        print("    \:\  \          \:\/\__\  \::/__/     \:\  \        \::/__/       \::/__/    ")
+        print("     \:\  \          \::/  /   \:\  \      \:\  \        \:\  \        \:\  \    ")
+        print("      \:\__\         /:/  /     \:\__\      \:\__\        \:\__\        \:\__\   ")
+        print("       \/__/         \/__/       \/__/       \/__/         \/__/         \/__/   ")
+        print("                                                                                 ")
 
     def on_enable(self) -> None:
         self.save_default_config()
@@ -25,6 +41,11 @@ class Map(Plugin):
 
         self._chunkDataSenderProcess = mp.Process(target=sendChunkData, args=(self._chunksQueue, self.config))
         self._chunkDataSenderProcess.start()
+
+    def on_disable(self) -> None:
+        if hasattr(self, '_chunkDataSenderProcess'):
+            self._chunkDataSenderProcess.terminate()
+            self._chunkDataSenderProcess.join(timeout=5)
 
     @event_handler
     def loadChunk(self, event: ChunkLoadEvent):
