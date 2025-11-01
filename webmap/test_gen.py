@@ -1,16 +1,16 @@
 from pathlib import Path
-from core.models import WorldSlice, Block
+from core.models import WorldData, Block
 from core.texture_manager import TextureManager
-from core.title_render import TitleRender
+from core.tile_renderer import TileRenderer
 import math
 
-TEXTURE_DIR = Path("assets/textures/block")
+TEXTURE_DIR = Path("assets/textures/blocks")
 if not TEXTURE_DIR.exists():
     raise FileNotFoundError("Папка не найдена крч")
 
 # init
 tm = TextureManager(TEXTURE_DIR)
-render = TitleRender(tm)
+render = TileRenderer(tm)
 
 # === 2. Генерация фигур ===
 
@@ -25,7 +25,7 @@ def make_spiral(center_x: int, center_z: int, turns: int = 3, step: float = 0.5)
         z = int(center_z + radius * math.sin(angle))
         y = int(radius / 2)  # высота растёт с радиусом
         block_type = block_types[block_id % len(block_types)]
-        blocks.append(Block(x=x, z=z, y=y, block_type=block_type))
+        blocks.append(Block(coordinates=(x, y, z), name=block_type))
         angle += 0.3
         radius += step
         block_id += 1
@@ -47,15 +47,15 @@ def make_island(center_x: int, center_z: int, radius: int = 8) -> list[Block]:
                 else:
                     block_type = "stone"
                 y = max(0, int(3 * (1 - dist / radius)))
-                blocks.append(Block(x=x, z=z, y=y, block_type=block_type))
+                blocks.append(Block(coordinates=(x, y, z), name=block_type))
     return blocks
 
 # === 3. Сборка мира ===
 blocks = []
-blocks.extend(make_island(0, 0, radius=10))
+blocks.extend(make_island(0, 0, 10))
 blocks.extend(make_spiral(25, 0, turns=4, step=0.7))
 
-world = WorldSlice(name="demo_world", blocks=blocks)
+world = WorldData(name="demo_world", blocks=blocks)
 
 # === 4. Рендеринг тайлов ===
 output_dir = Path("output")
@@ -63,8 +63,8 @@ output_dir.mkdir(exist_ok=True)
 
 for zoom in [0, 1, 2]:
     # Определим границы мира
-    xs = [b.x for b in blocks]
-    zs = [b.z for b in blocks]
+    xs = [b.coordinates[0] for b in blocks]
+    zs = [b.coordinates[2] for b in blocks]
     min_x, max_x = min(xs), max(xs)
     min_z, max_z = min(zs), max(zs)
 
@@ -76,7 +76,7 @@ for zoom in [0, 1, 2]:
 
     for tx in range(tile_min_x, tile_max_x + 1):
         for tz in range(tile_min_z, tile_max_z + 1):
-            img = render.render_title(blocks, title_x=tx, title_y=tz, zoom=zoom)
+            img = render.render_tile(blocks, tile_x=tx, tile_y=tz, zoom=zoom)
             path = output_dir / f"tile_z{zoom}_x{tx}_y{tz}.png"
             img.save(path)
             print(f"✅ Сохранён: {path}")
