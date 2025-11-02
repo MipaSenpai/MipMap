@@ -1,17 +1,46 @@
-import requests
+import asyncio
+import aiohttp
 import multiprocessing as mp
 
 from endstone.plugin import Plugin
 from endstone.event import event_handler, ChunkLoadEvent
 
 
-def sendChunkData(queue: mp.Queue, config: dict) -> None:
-    while True:
-        chunkData = queue.get()
+class ErrorSendChunk(Exception):
+    pass
+
+
+class AsyncChunkSender:
+    def __init__(self, config: dict):
+        self.config = config
+        
+    async def _sendChunkData(self, session: aiohttp.ClientSession, data: dict) -> None:
         try:
-            requests.post(config.get("mapUrl"), json=chunkData, timeout=5)
+            async with session.post(
+                self.config.get("mapUrl"),
+                json=data,
+                timeout=aiohttp.ClientTimeout(total=5)
+                ) as response:
+
+                if response.status != 200:
+                    raise ErrorSendChunk(f"HTTP error {response.status} for chunk data")
+                
         except Exception as e:
-            print(f"Error sending chunk: \n{e}")
+            raise ErrorSendChunk(f"Error sending chunk: {e}")
+            
+    async def run(self, queue: mp.Queue) -> None:
+        async with aiohttp.ClientSession() as session:
+            while True:
+                if not queue.empty():
+                    chunkData = queue.get()
+                    asyncio.create_task(self._sendChunkData(session, chunkData))
+                else:
+                    await asyncio.sleep(0.1)
+
+
+def startChunkSender(queue: mp.Queue, config: dict) -> None:
+    sender = AsyncChunkSender(config)
+    asyncio.run(sender.run(queue))
 
 
 class Map(Plugin):
@@ -34,10 +63,10 @@ class Map(Plugin):
     def on_enable(self) -> None:
         self.save_default_config()
         self.register_events(self)
-        
+
         self._chunksQueue = mp.Queue()
 
-        self._chunkDataSenderProcess = mp.Process(target=sendChunkData, args=(self._chunksQueue, self.config))
+        self._chunkDataSenderProcess = mp.Process(target=startChunkSender, args=(self._chunksQueue, self.config))
         self._chunkDataSenderProcess.start()
 
     def on_disable(self) -> None:
