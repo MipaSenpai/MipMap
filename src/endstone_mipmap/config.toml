@@ -1,1 +1,1 @@
-mapUrl = "http://localhost:7000/api/chunks"
+mapUrl = "http://localhost:8000/api/chunk-data"

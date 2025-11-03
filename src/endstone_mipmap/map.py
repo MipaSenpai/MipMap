@@ -20,13 +20,16 @@ class AsyncChunkSender:
                 self.config.get("mapUrl"),
                 json=data,
                 timeout=aiohttp.ClientTimeout(total=5)
-                ) as response:
+            ) as response:
 
                 if response.status != 200:
                     raise ErrorSendChunk(f"HTTP error {response.status} for chunk data")
                 
-        except Exception as e:
-            raise ErrorSendChunk(f"Error sending chunk: {e}")
+        except aiohttp.ClientError as e:
+            raise ErrorSendChunk(f"Network error sending chunk: {e}")
+        
+        except asyncio.TimeoutError as e:
+            raise ErrorSendChunk(f"Timeout sending chunk: {e}")
             
     async def run(self, queue: mp.Queue) -> None:
         async with aiohttp.ClientSession() as session:

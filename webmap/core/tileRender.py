@@ -36,7 +36,7 @@ class TextureLoader:
 
 
 class Tile:
-    _tilesPath = Path("assets/tiles/zoom-0")
+    _tilesPath = Path("assets/tiles/zoom-4")
 
     def __init__(self):
         self._tileSize = 256
@@ -51,21 +51,20 @@ class Tile:
 
         for block in blocks:
             tileX = (block.x * self._blockSize) // self._tileSize
-            tileZ = (block.z * self._blockSize) // self._tileSize
-            tileKey = (tileX, tileZ)
+            tileY = (block.z * self._blockSize) // self._tileSize
+            tileKey = (tileX, tileY)
 
             tileBlockX = (block.x * self._blockSize) % self._tileSize
-            tileBlockZ = (block.z * self._blockSize) % self._tileSize
+            tileBlockY = (block.z * self._blockSize) % self._tileSize
 
             if tileKey not in tileMap:
-                tilePath = self._tilesPath / f"({tileX})-({tileZ}).png"
+                tilePath = self._tilesPath / f"({tileX})-({tileY}).png"
                 tileMap[tileKey] = self._loadTile(tilePath)
 
             texture = self._textureLoader.getTexture(block)
-            tileMap[tileKey].paste(texture, (tileBlockX, tileBlockZ))
+            tileMap[tileKey].paste(texture, (tileBlockX, tileBlockY))
 
         self._saveTiles(tileMap)
-        print(f"Обработано {len(blocks)} блоков, создано {len(tileMap)} тайлов")
 
     def _loadTile(self, tilePath: Path) -> Image.Image:
         if tilePath.exists():
@@ -75,7 +74,6 @@ class Tile:
 
     def _saveTiles(self, tileMap: dict) -> None:
         for tileKey, tileImage in tileMap.items():
-            tileX, tileZ = tileKey
-            tilePath = self._tilesPath / f"({tileX})-({tileZ}).png"
+            tileX, tileY = tileKey
+            tilePath = self._tilesPath / f"({tileX})-({tileY}).png"
             tileImage.save(tilePath)
-            print(f"Сохранен тайл: {tilePath}")
