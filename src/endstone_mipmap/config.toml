@@ -1,1 +1,31 @@
 mapUrl = "http://localhost:8000/api/chunk-data"
+timeout = 5
+
+[mapLoading]
+batchSize = 100
+maxAreas = 10
+batchDelay = 600 # ticks
+
+[mapLoading.defaultArea]
+minX = 0
+minZ = 0
+maxX = 500
+maxZ = 500
+
+[messages]
+noPermission = "You don't have permission to execute this command!"
+loadingInProgress = "Map loading is in progress. Areas remaining: {remaining}"
+loadingNotRunning = "Map loading is not running"
+invalidCoordinates = "Invalid coordinates! min must be less than max"
+invalidFormat = "Invalid coordinate format! Use numbers"
+loadingStarted = "Map loading started for area ({minX}, {minZ}) - ({maxX}, {maxZ})"
+helpUsage = "Usage of /loadmap command:"
+helpDefault = "/loadmap - start loading with default parameters"
+helpCustom = "/loadmap <minX> <minZ> <maxX> <maxZ> - start with custom coordinates"
+helpStatus = "/loadmap status - check loading status"
+helpInfo = "/loadmap help - command information"
+mapLoadingAlreadyRunning = "Map loading is already running!"
+mapLoadingStartedLog = "Map loading started. Total areas: {areaCount}"
+processingBatch = "Processing batch of {batchSize} areas. Remaining: {remaining}"
+batchProcessed = "Batch of {batchSize} areas processed and removed"
+mapLoadingFinished = "Map loading completed!"
