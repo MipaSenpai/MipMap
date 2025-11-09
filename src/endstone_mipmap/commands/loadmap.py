@@ -8,17 +8,15 @@ class MapLoader():
     def __init__(self, plugin: Plugin):
         self.plugin = plugin
         self.isLoading = False
+
         self.messages: dict = self.plugin.config.get("messages", {})
         self.areasQueue: List[Tuple[int, int, int, int, str]] = []
         
-    def startLoading(self, minX: int = 0, minZ: int = 0, 
-                     maxX: int = 500, maxZ: int = 500, 
-                     batchSize: int = 100, maxAreas: int = 10) -> None:
-
+    def startLoading(self, minX: int, minZ: int, maxX: int, maxZ: int, batchSize: int, maxAreas: int) -> None:
         if self.isLoading:
             self.plugin.logger.warning(self.messages.get("mapLoadingAlreadyRunning"))
             return
-            
+        
         self.isLoading = True
         self.areasQueue = []
         self.maxAreas = maxAreas
@@ -81,26 +79,28 @@ class LoadmapCommand(CommandExecutor):
         super().__init__()
         self.plugin = plugin
         self.mapLoader = MapLoader(plugin)
-        self.messages: dict = self.plugin.config.get("messages", {})
-    
-    def on_command(self, sender: CommandSender, command: Command, args: List[str]) -> bool:        
-        if not sender.has_permission("mipmap.command.loadmap"):
-            sender.send_message(self.messages.get("noPermission"))
-            return True
-            
-        if len(args) == 0:
-            config: dict = self.plugin.config
-            defaultArea: dict = config.get("mapLoading", {}).get("defaultArea", {})
-            
-            minX = defaultArea.get("minX", 0)
-            minZ = defaultArea.get("minZ", 0)
-            maxX = defaultArea.get("maxX", 500)
-            maxZ = defaultArea.get("maxZ", 500)
 
-            batchSize = config.get("mapLoading", {}).get("batchSize", 100)
-            maxAreas = config.get("mapLoading", {}).get("maxAreas", 10)
+        self.messages: dict = self.plugin.config.get("messages", {})
+        self.config: dict = self.plugin.config
+
+        self.batchSize = self.config.get("mapLoading", {}).get("batchSize", 100)
+        self.maxAreas = self.config.get("mapLoading", {}).get("maxAreas", 10)
+    
+    def clearAreas(self):
+        self.plugin.server.dispatch_command(self.plugin.server.command_sender, "tickingarea remove_all")
+
+    def on_command(self, sender: CommandSender, command: Command, args: List[str]) -> bool:                    
+        if len(args) == 0:
+            self.clearAreas()
             
-            self.mapLoader.startLoading(minX, minZ, maxX, maxZ, batchSize, maxAreas)
+            defaultArea: dict = self.config.get("mapLoading", {}).get("defaultArea", {})
+            
+            minX = defaultArea.get("minX")
+            minZ = defaultArea.get("minZ")
+            maxX = defaultArea.get("maxX")
+            maxZ = defaultArea.get("maxZ")
+            
+            self.mapLoader.startLoading(minX, minZ, maxX, maxZ, self.batchSize, self.maxAreas)
             sender.send_message(self.messages.get("loadingStarted").format(minX=minX, minZ=minZ, maxX=maxX, maxZ=maxZ))
                 
         elif args[0].lower() == "status":
@@ -110,18 +110,17 @@ class LoadmapCommand(CommandExecutor):
             else:
                 sender.send_message(self.messages.get("loadingNotRunning"))
                 
-        elif len(args) >= 4:
-            try:
-                minX, minZ, maxX, maxZ = map(int, args[:4])
-                if minX >= maxX or minZ >= maxZ:
-                    sender.send_message(self.messages.get("invalidCoordinates"))
-                    return True
-                    
-                self.mapLoader.startLoading(minX, minZ, maxX, maxZ)
-                sender.send_message(self.messages.get("loadingStarted").format(minX=minX, minZ=minZ, maxX=maxX, maxZ=maxZ))
+        elif len(args) == 4:
+            self.clearAreas()
+
+            minX, minZ, maxX, maxZ = map(int, args[:4])
+            if minX >= maxX or minZ >= maxZ:
+                sender.send_message(self.messages.get("invalidCoordinates"))
+                return True
+
+            self.mapLoader.startLoading(minX, minZ, maxX, maxZ, self.batchSize, self.maxAreas)
+            sender.send_message(self.messages.get("loadingStarted").format(minX=minX, minZ=minZ, maxX=maxX, maxZ=maxZ))
                 
-            except ValueError:
-                sender.send_message(self.messages.get("invalidFormat"))
                 
         elif args[0].lower() == "help":
             sender.send_message(self.messages.get("helpUsage"))

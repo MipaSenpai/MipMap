@@ -1,61 +1,37 @@
-from fastapi import FastAPI, HTTPException, Request, Response
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from pathlib import Path
+from core.config import STATIC_DIR, TEMPLATES_DIR
+from core.logging import setupLogging
 
-from core.models import ChunkRequest
-from core.tileRender import Tile
-
-
-app = FastAPI()
+from api.tiles import router as tilesRouter
+from api.chunks import router as chunksRouter, getTileManager
 
 
-WEB_DIR = Path(__file__).parent / "web"
-STATIC_DIR = WEB_DIR / "static"
-TEMPLATES_DIR = WEB_DIR / "templates"
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    tileManager = getTileManager()
+    tileManager.startWorkers()
+    yield
+    tileManager.stopWorkers()
 
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
-
-
-@app.get("/")
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/api/tiles/{z}/{x}/{y}")
-async def getTile(z: int, x: int, y: int):
-    try:
-        with open(f"assets/tiles/zoom-{z}/({x})-({y}).png", "rb") as f:
-            tileData = f.read()
-
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Tile not found")
+def createApp() -> FastAPI:
+    setupLogging()
     
-    return Response(
-        content=tileData,
-        media_type="image/png",
-        headers={"Cache-Control": "public, max-age=3600"}
-    )
-
-
-@app.post("/api/chunk-data")
-async def receiveChunkData(chunkData: ChunkRequest):
-    try:
-        dimension = chunkData.chunk.dimension
-        blocks = chunkData.chunk.blocks
-        
-        print(f"Получены данные для измерения: {dimension}")
-        print(f"Количество блоков: {len(blocks)}")
-        
-        for block in blocks:
-            print(f"Блок: {block.name}, координаты: {block.coordinates}")
-        
-        Tile().generateTile(chunkData.chunk)
-
-        return {"status": "success", "message": "Данные успешно получены"}
+    app = FastAPI(lifespan=lifespan)
     
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Ошибка обработки данных: {str(e)}")
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    templates = Jinja2Templates(directory=TEMPLATES_DIR)
+    
+    app.include_router(tilesRouter)
+    app.include_router(chunksRouter)
+    
+    @app.get("/")
+    async def home(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
+    
+    return app
