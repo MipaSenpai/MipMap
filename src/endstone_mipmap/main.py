@@ -4,12 +4,12 @@ import multiprocessing as mp
 from endstone.plugin import Plugin
 from endstone.event import event_handler, ChunkLoadEvent
 
-from .sender import ChunkSender
+from .core import ChunkSender, BatchTracker
 from .commands.loadmap import LoadmapCommand
 
 
-def startChunkSender(queue: mp.Queue, config: dict) -> None:
-    sender = ChunkSender(config)
+def startChunkSender(queue: mp.Queue, resultQueue: mp.Queue, config: dict) -> None:
+    sender = ChunkSender(config, resultQueue)
     asyncio.run(sender.run(queue))
 
 
@@ -56,18 +56,48 @@ class Map(Plugin):
         self.register_events(self)
         self.get_command("loadmap").executor = LoadmapCommand(self)
 
+        self.batchTracker = BatchTracker(self)
+
         self._chunksQueue = mp.Queue()
-        self._chunkDataSenderProcess = mp.Process(target=startChunkSender, args=(self._chunksQueue, self.config))
+        self._resultQueue = mp.Queue()
+        
+        self._chunkDataSenderProcess = mp.Process(
+            target=startChunkSender, 
+            args=(self._chunksQueue, self._resultQueue, self.config)
+        )
         self._chunkDataSenderProcess.start()
+        
+        self._scheduleResultProcessing()
 
     def on_disable(self) -> None:
         if hasattr(self, '_chunkDataSenderProcess'):
             self._chunkDataSenderProcess.terminate()
             self._chunkDataSenderProcess.join(timeout=5)
 
+    def _scheduleResultProcessing(self) -> None:
+        self.server.scheduler.run_task(self, self._processResults, 1)
+    
+    def _processResults(self) -> None:
+        while not self._resultQueue.empty():
+            try:
+                result = self._resultQueue.get_nowait()
+                status, chunk_x, chunk_z = result
+                
+                if status == "success":
+                    self.batchTracker.chunkProcessed(chunk_x, chunk_z)
+                    
+            except:
+                break
+        
+        self._scheduleResultProcessing()
+    
     @event_handler
     def loadChunk(self, event: ChunkLoadEvent):
         chunkData = self._getСhunkData(event)
+        
+        chunkData["chunkX"] = event.chunk.x
+        chunkData["chunkZ"] = event.chunk.z
+        
         self._chunksQueue.put(chunkData)
 
     def _getСhunkData(self, event: ChunkLoadEvent) -> dict:

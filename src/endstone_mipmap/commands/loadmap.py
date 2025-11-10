@@ -1,3 +1,5 @@
+import math
+
 from typing import List, Tuple
 
 from endstone.command import Command, CommandSender, CommandExecutor
@@ -11,6 +13,10 @@ class MapLoader():
 
         self.messages: dict = self.plugin.config.get("messages", {})
         self.areasQueue: List[Tuple[int, int, int, int, str]] = []
+
+        self.batchId = 0
+        self.totalBatches = 0
+        self.completedBatches = 0
         
     def startLoading(self, minX: int, minZ: int, maxX: int, maxZ: int, batchSize: int, maxAreas: int) -> None:
         if self.isLoading:
@@ -20,6 +26,7 @@ class MapLoader():
         self.isLoading = True
         self.areasQueue = []
         self.maxAreas = maxAreas
+        self.completedBatches = 0
         
         areaCount = 0
         for x in range(minX, maxX, batchSize):
@@ -31,7 +38,9 @@ class MapLoader():
 
                 self.areasQueue.append((x, z, endX, endZ, areaId))
                 areaCount += 1
-
+        
+        self.totalBatches = math.ceil(areaCount / maxAreas)
+        
         self.plugin.logger.info(self.messages.get("mapLoadingStartedLog").format(areaCount=areaCount))
         self._nextBatch()
 
@@ -44,9 +53,18 @@ class MapLoader():
         for _ in range(min(self.maxAreas, len(self.areasQueue))):
             batch.append(self.areasQueue.pop(0))
         
+        self.completedBatches += 1
+        batchNum = self.completedBatches
+        
+        percentage = (batchNum / self.totalBatches * 100) if self.totalBatches > 0 else 0
+        
         self.plugin.logger.info(
             self.messages.get("processingBatch").format(
-                batchSize=len(batch), remaining=len(self.areasQueue)
+                batchSize=len(batch), 
+                remaining=len(self.areasQueue),
+                currentBatch=batchNum,
+                totalBatches=self.totalBatches,
+                percentage=percentage
             )
         )
         
@@ -54,11 +72,12 @@ class MapLoader():
             command = f"tickingarea add {x} 0 {z} {endX} 0 {endZ} {areaId}"
             self.plugin.server.dispatch_command(self.plugin.server.command_sender, command)
         
-        batchDelay = self.plugin.config.get("mapLoading", {}).get("batchDelay", 600)
-        self.plugin.server.scheduler.run_task(
-            self.plugin, 
-            lambda: self._removeBatch(batch), 
-            batchDelay
+        self.batchId += 1
+        
+        self.plugin.batchTracker.startBatch(
+            batchId=self.batchId,
+            areas=batch,
+            onComplete=lambda: self._removeBatch(batch)
         )
 
     def _removeBatch(self, batch: List[Tuple[int, int, int, int, str]]) -> None:
@@ -67,10 +86,12 @@ class MapLoader():
             self.plugin.server.dispatch_command(self.plugin.server.command_sender, command)
         
         self.plugin.logger.info(self.messages.get("batchProcessed").format(batchSize=len(batch)))
+        
         self.plugin.server.scheduler.run_task(self.plugin, self._nextBatch, 1)
 
     def _finishLoading(self) -> None:
         self.isLoading = False
+        self.plugin.batchTracker.cancelBatch()
         self.plugin.logger.info(self.messages.get("mapLoadingFinished"))
 
 
@@ -120,7 +141,6 @@ class LoadmapCommand(CommandExecutor):
 
             self.mapLoader.startLoading(minX, minZ, maxX, maxZ, self.batchSize, self.maxAreas)
             sender.send_message(self.messages.get("loadingStarted").format(minX=minX, minZ=minZ, maxX=maxX, maxZ=maxZ))
-                
                 
         elif args[0].lower() == "help":
             sender.send_message(self.messages.get("helpUsage"))
