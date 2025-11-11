@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const map = L.map("map", {
     crs: L.CRS.Simple,
-    minZoom: 1,
+    minZoom: 0,
     maxZoom: 4,
     zoomControl: false,
   });
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   map.setView([0, 0], 2);
 
   L.tileLayer("api/tiles/{z}/{x}/{y}", {
-    minZoom: 1,
+    minZoom: 0,
     maxZoom: 4,
     tileSize: 256,
     noWrap: true,

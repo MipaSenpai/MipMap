@@ -9,14 +9,21 @@ from core.logging import setupLogging
 
 from api.tiles import router as tilesRouter
 from api.chunks import router as chunksRouter, getTileManager
+from services.zoomGenerator import ZoomManager
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     tileManager = getTileManager()
     tileManager.startWorkers()
+    
+    zoomManager = ZoomManager()
+    zoomManager.start()
+    
     yield
+    
     tileManager.stopWorkers()
+    zoomManager.stop()
 
 
 def createApp() -> FastAPI:
