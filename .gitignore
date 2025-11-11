@@ -15,6 +15,7 @@ develop-eggs/
 dist/
 downloads/
 bedrock_server/
+webmap/assets/tiles/
 eggs/
 .eggs/
 lib/

@@ -2,17 +2,17 @@
 document.addEventListener("DOMContentLoaded", () => {
   const map = L.map("map", {
     crs: L.CRS.Simple,
-    minZoom: 1,
-    maxZoom: 5,
+    minZoom: 0,
+    maxZoom: 4,
     zoomControl: false,
   });
 
   L.control.zoom({ position: "bottomright" }).addTo(map);
   map.setView([0, 0], 2);
 
-  L.tileLayer("/api/v1/tiles/{z}/{x}/{y}.webp", {
-    minZoom: 1,
-    maxZoom: 5,
+  L.tileLayer("api/tiles/{z}/{x}/{y}", {
+    minZoom: 0,
+    maxZoom: 4,
     tileSize: 256,
     noWrap: true,
     continuousWorld: true,
