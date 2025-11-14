@@ -4,15 +4,21 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-mipmap"
-version = "0.0.1"
-dependencies = []
+version = "1.0.0"
+
+dependencies = [
+    "endstone>=0.10.8",
+    "aiohttp>=3.13.0"
+]
+
 authors = [
     { name = "Mipa" },
 ]
+
 description = "MipMap - Interactive Online Map for Endstone."
 readme = "README.md"
 license = { file = "LICENSE" }
-keywords = ["endstone", "plugin", "map"]
+keywords = ["endstone", "plugin", "online-map"]
 
 [project.urls]
 Homepage = "https://github.com/MipaSenpai/MipMap"
