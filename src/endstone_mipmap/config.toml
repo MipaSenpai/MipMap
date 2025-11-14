@@ -1,12 +1,19 @@
-mapUrl = "http://localhost:8000/api/chunk-data"
-playersUrl = "http://localhost:8000/api/players"
+# Settings MipMap
+
+# Display players on the map
 sendPlayers = true
 
+# Warning: modify only if you understand the consequences
+[api]
+chunks = "http://localhost:8000/api/chunks-data"
+players = "http://localhost:8000/api/players-data"
 
+# Warning: modify only if you understand the consequences
 [mapLoading]
 batchSize = 100
 maxAreas = 10
 
+# Standard map loading dimensions for /loadmap command
 [mapLoading.defaultArea]
 minX = 0
 minZ = 0
@@ -32,7 +39,7 @@ mapLoadingAlreadyRunning = "Map loading is already running!"
 mapLoadingStartedLog = "Map loading started. Total areas: {areaCount}"
 mapLoadingFinished = "Map loading completed!"
 
-
+# List of blocks that will be skipped during map processing
 [blacklist]
 blocks = [
     "minecraft:oxidized_copper_door",

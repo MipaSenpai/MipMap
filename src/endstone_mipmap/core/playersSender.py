@@ -7,12 +7,11 @@ import multiprocessing as mp
 class PlayersSender:
     def __init__(self, config: dict):
         self.timeout = 5
-        self.config = config
+        self.url = config.get("api").get("players")
         
     async def _sendPlayerData(self, session: aiohttp.ClientSession, data: dict) -> None:
         try:
-            playersUrl = self.config.get("playersUrl")
-            async with session.post(playersUrl, json=data, timeout=self.timeout) as response:
+            async with session.post(self.url, json=data, timeout=self.timeout) as response:
                 if response.status != 200:
                     errorText = await response.text()
                     print(f"[Mipmap] HTTP error {response.status} for players data: {errorText}")

@@ -7,8 +7,8 @@ import multiprocessing as mp
 class ChunksSender:
     def __init__(self, config: dict, resultQueue: mp.Queue):
         self.timeout = 5
-        self.config = config
         self.resultQueue = resultQueue
+        self.url = config.get("api").get("chunks")
         
     async def _sendChunkData(self, session: aiohttp.ClientSession, data: dict) -> None:
         chunkX = data.get("chunkX")
@@ -17,7 +17,7 @@ class ChunksSender:
         payload = {"chunk": data.get("chunk")}
         
         try:
-            async with session.post(self.config.get("mapUrl"), json=payload, timeout=self.timeout) as response:
+            async with session.post(self.url, json=payload, timeout=self.timeout) as response:
                 if response.status == 200:
                     self.resultQueue.put(("success", chunkX, chunkZ))
 

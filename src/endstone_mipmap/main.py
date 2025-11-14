@@ -60,6 +60,7 @@ class Map(Plugin):
     def on_enable(self) -> None:
         self.save_default_config()
         self.register_events(self)
+
         self.get_command("loadmap").executor = LoadmapCommand(self)
 
         self.batchTracker = BatchTracker(self)
@@ -158,7 +159,7 @@ class Map(Plugin):
         world = event.chunk.dimension
         chunkX = event.chunk.x
         chunkZ = event.chunk.z
-        
+
         chunkStartX = chunkX * 16
         chunkStartZ = chunkZ * 16
         chunkEndX = chunkStartX + 16
