@@ -2,10 +2,11 @@ import asyncio
 import multiprocessing as mp
 
 from endstone.plugin import Plugin
+from endstone.block import BlockFace
 from endstone.event import event_handler, ChunkLoadEvent, PlayerJoinEvent, PlayerQuitEvent
 
-from .core import ChunksSender, PlayersSender, BatchTracker
 from .commands.loadmap import LoadmapCommand
+from .core import ChunksSender, PlayersSender, BatchTracker
 
 
 def startChunkSender(queue: mp.Queue, resultQueue: mp.Queue, config: dict) -> None:
@@ -136,7 +137,7 @@ class Map(Plugin):
         players = []
         
         for player in self.server.online_players:
-            skin = player.skin.image # TODO add check 4d skin
+            skin = player.skin.image
                         
             players.append({
                 "name": player.name,
@@ -164,11 +165,16 @@ class Map(Plugin):
         chunkEndZ = chunkStartZ + 16
 
         blocksData = []
+        blacklist: dict = self.config.get("blacklist")
 
         for x in range(chunkStartX, chunkEndX):
             for z in range(chunkStartZ, chunkEndZ):                
                 block = world.get_highest_block_at(x, z)
                 blockType = block.data.type
+
+                while blockType in blacklist.get("blocks") and block.y > -64:
+                    block = block.get_relative(BlockFace.DOWN, 1)
+                    blockType = block.data.type
 
                 blocksData.append({
                     "name": blockType,
