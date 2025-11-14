@@ -1,4 +1,6 @@
 mapUrl = "http://localhost:8000/api/chunk-data"
+playersUrl = "http://localhost:8000/api/players"
+sendPlayers = true
 
 
 [mapLoading]

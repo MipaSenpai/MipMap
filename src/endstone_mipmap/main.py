@@ -2,14 +2,19 @@ import asyncio
 import multiprocessing as mp
 
 from endstone.plugin import Plugin
-from endstone.event import event_handler, ChunkLoadEvent
+from endstone.event import event_handler, ChunkLoadEvent, PlayerJoinEvent, PlayerQuitEvent
 
-from .core import ChunkSender, BatchTracker
+from .core import ChunksSender, PlayersSender, BatchTracker
 from .commands.loadmap import LoadmapCommand
 
 
 def startChunkSender(queue: mp.Queue, resultQueue: mp.Queue, config: dict) -> None:
-    sender = ChunkSender(config, resultQueue)
+    sender = ChunksSender(config, resultQueue)
+    asyncio.run(sender.run(queue))
+
+
+def startPlayersSender(queue: mp.Queue, config: dict) -> None:
+    sender = PlayersSender(config)
     asyncio.run(sender.run(queue))
 
 
@@ -60,6 +65,7 @@ class Map(Plugin):
 
         self._chunksQueue = mp.Queue()
         self._resultQueue = mp.Queue()
+        self._playersQueue = mp.Queue()
         
         self._chunkDataSenderProcess = mp.Process(
             target=startChunkSender, 
@@ -68,29 +74,24 @@ class Map(Plugin):
         self._chunkDataSenderProcess.start()
         
         self._scheduleResultProcessing()
+        
+        self._playerDataSenderProcess = mp.Process(
+            target=startPlayersSender,
+            args=(self._playersQueue, self.config)
+        )
+        self._playerDataSenderProcess.start()
+        
+        self._schedulePlayersUpdate()
 
     def on_disable(self) -> None:
         if hasattr(self, '_chunkDataSenderProcess'):
             self._chunkDataSenderProcess.terminate()
             self._chunkDataSenderProcess.join(timeout=5)
-
-    def _scheduleResultProcessing(self) -> None:
-        self.server.scheduler.run_task(self, self._processResults, 1)
-    
-    def _processResults(self) -> None:
-        while not self._resultQueue.empty():
-            try:
-                result = self._resultQueue.get_nowait()
-                status, chunk_x, chunk_z = result
-                
-                if status == "success":
-                    self.batchTracker.chunkProcessed(chunk_x, chunk_z)
-                    
-            except:
-                break
         
-        self._scheduleResultProcessing()
-    
+        if hasattr(self, '_playerDataSenderProcess'):
+            self._playerDataSenderProcess.terminate()
+            self._playerDataSenderProcess.join(timeout=5)
+
     @event_handler
     def loadChunk(self, event: ChunkLoadEvent):
         chunkData = self._getСhunkData(event)
@@ -99,6 +100,58 @@ class Map(Plugin):
         chunkData["chunkZ"] = event.chunk.z
         
         self._chunksQueue.put(chunkData)
+    
+    @event_handler
+    def onPlayerJoin(self, event: PlayerJoinEvent):
+        self._sendPlayers()
+    
+    @event_handler
+    def onPlayerQuit(self, event: PlayerQuitEvent):
+        self._sendPlayers()
+
+    def _scheduleResultProcessing(self) -> None:
+        self.server.scheduler.run_task(self, self._processResults, 1)
+    
+    def _processResults(self) -> None:
+        while not self._resultQueue.empty():
+            try:
+                result = self._resultQueue.get_nowait()
+                status, chunkX, chunkZ = result
+                
+                if status == "success":
+                    self.batchTracker.chunkProcessed(chunkX, chunkZ)
+                    
+            except:
+                break
+        
+        self._scheduleResultProcessing()
+    
+    def _schedulePlayersUpdate(self) -> None:
+        self.server.scheduler.run_task(self, self._sendPlayers, delay=100)
+    
+    def _sendPlayers(self) -> None:
+        if not self.config.get("sendPlayers"):
+            return
+        
+        players = []
+        
+        for player in self.server.online_players:
+            skin = player.skin.image # TODO add check 4d skin
+                        
+            players.append({
+                "name": player.name,
+                "skin": skin.tobytes().hex(),
+                "skinShape": list(skin.shape),
+                "dimension": player.dimension.name,
+                "x": player.location.x,
+                "y": player.location.y,
+                "z": player.location.z
+            })
+        
+        playerData = {"players": players}
+        self._playersQueue.put(playerData)
+        
+        self._schedulePlayersUpdate()
 
     def _getСhunkData(self, event: ChunkLoadEvent) -> dict:
         world = event.chunk.dimension

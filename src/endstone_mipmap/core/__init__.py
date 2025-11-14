@@ -1,4 +1,6 @@
 from .tracker import BatchTracker
-from .sender import ChunkSender
+from .chunksSender import ChunksSender
+from .playersSender import PlayersSender
 
-__all__ = ["BatchTracker", "ChunkSender"]
+
+__all__ = ["BatchTracker", "ChunksSender", "PlayersSender"]

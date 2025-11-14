@@ -4,7 +4,7 @@ import aiohttp
 import multiprocessing as mp
 
 
-class ChunkSender:
+class ChunksSender:
     def __init__(self, config: dict, resultQueue: mp.Queue):
         self.timeout = 5
         self.config = config
