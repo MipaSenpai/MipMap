@@ -29,7 +29,7 @@
 ## 🎬 See It In Action
 
 <p align="center">
-  <img src="https://s3.iimg.su/s/15/gb0CaCAxbWDYZrPAUcRp1KRO8w4qm15PTR8n1vKU.gif" alt="MipMap Demo" width="800">
+  <img src=".github/images/demo.gif" alt="MipMap Demo" width="800">
 </p>
 
 <p align="center">
