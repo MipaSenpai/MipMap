@@ -17,7 +17,7 @@
   <a href="https://github.com/MipaSenpai/MipMap/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-9400D3?style=for-the-badge&logoColor=white" />
   </a>
-  <img src="https://img.shields.io/badge/python-3.13+-7C83FD?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/python-3.9+-7C83FD?style=for-the-badge&logo=python&logoColor=white" />
 </p>
 
 <p align="center">
@@ -244,7 +244,7 @@ Receives player position data.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Endstone-0.10+-7C83FD?style=for-the-badge&logoColor=white" />
-  <img src="https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
   <img src="https://img.shields.io/badge/Pillow-8A2BE2?style=for-the-badge&logoColor=white" />
   <img src="https://img.shields.io/badge/Leaflet.js-199900?style=for-the-badge&logo=leaflet&logoColor=white" />
