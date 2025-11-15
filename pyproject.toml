@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 authors = [
-    { name = "Mipa" },
+    { name = "Mipa", name = "Bebrowskiy" },
 ]
 
 description = "MipMap - Interactive Online Map for Endstone."
