@@ -5,18 +5,17 @@ from services.tileService import TileQueueManager
 from core.logging import getLogger
 
 
-router = APIRouter(prefix="/api", tags=["chunks"])
 logger = getLogger(__name__)
+router = APIRouter(prefix="/api", tags=["chunks"])
 
 
 tileManager = TileQueueManager()
 
 
-@router.post("/chunk-data")
+@router.post("/chunks-data")
 async def receiveChunkData(chunkData: ChunkRequest):
     try:    
         queueSize = tileManager.addTask(chunkData.chunk)
-        
         logger.info(f"Task added to queue. Queue size: {queueSize}")
 
         return {

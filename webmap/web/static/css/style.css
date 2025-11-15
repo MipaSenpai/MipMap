@@ -1,3 +1,21 @@
+@font-face {
+    font-family: "minecraft";
+    src: url("/static/assets/minecraft.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --bg-primary: rgba(26, 12, 32, 0.85);
+    --bg-hover: rgba(26, 12, 32, 0.95);
+    --border-primary: #5a3d7a;
+    --color-primary: #c74aff;
+    --color-secondary: #e0d0f0;
+    --color-accent: #ff3a6e;
+    --shadow-glow: 0 0 12px rgba(199, 74, 255, 0.4);
+    --transition: all 0.2s ease;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -8,111 +26,148 @@ body,
 #map {
     width: 100%;
     height: 100vh;
-    background: #0d0812;
-    font-family: "Inter", sans-serif;
-    color: #e0d0f0;
+    background: linear-gradient(135deg, #0b0b1a, #1a1a2e);
+    font-family: "minecraft", sans-serif;
+    color: var(--color-secondary);
     overflow: hidden;
 }
 
 .leaflet-container {
-    background: #0d0812;
+    background: transparent;
 }
 
-/* UI */
-.ui-panel {
+.leaflet-control-attribution {
+    display: none !important;
+}
+
+.logo {
     position: absolute;
     top: 16px;
     left: 16px;
     display: flex;
-    gap: 16px;
     align-items: center;
-    pointer-events: none;
+    gap: 10px;
+    background: var(--bg-primary);
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-primary);
+    color: var(--color-primary);
+    backdrop-filter: blur(8px);
+    transition: var(--transition);
+    font-size: 18px;
+    white-space: nowrap;
     z-index: 1000;
 }
 
-.ui-panel > * {
-    pointer-events: auto;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(26, 12, 32, 0.7);
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: 1px solid #5a3d7a;
-    font-weight: 700;
-    color: #c74aff;
-    backdrop-filter: blur(4px);
-    transition: all 0.25s ease;
-}
-
 .logo:hover {
-    background: rgba(26, 12, 32, 0.95);
-    border-color: #c74aff;
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
     color: #fff;
-    box-shadow: 0 0 12px rgba(199, 74, 255, 0.4);
+    box-shadow: var(--shadow-glow);
 }
 
-.logo svg {
-    transition: all 0.25s ease;
+.logo-icon {
+    width: 30px;
+    height: 30px;
+    transition: var(--transition);
 }
 
-.logo:hover svg {
-    filter: drop-shadow(0 0 8px #c74aff);
+.logo:hover .logo-icon {
+    filter: drop-shadow(0 0 8px var(--color-primary));
 }
 
 .coords {
-    background: rgba(26, 12, 32, 0.7);
+    position: absolute;
+    top: 72px;
+    left: 16px;
+    background: var(--bg-primary);
     padding: 8px 14px;
     border-radius: 10px;
-    border: 1px solid #5a3d7a;
-    font-size: 15px;
-    font-weight: 500;
-    color: #e0d0f0;
-    backdrop-filter: blur(4px);
-    transition: all 0.2s ease;
+    border: 1px solid var(--border-primary);
+    font-size: 16px;
+    color: var(--color-secondary);
+    backdrop-filter: blur(8px);
+    transition: var(--transition);
     cursor: pointer;
+    white-space: nowrap;
+    z-index: 1000;
 }
 
 .coords:hover {
-    border-color: #ff3a6e;
-    color: #ff3a6e;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
 }
 
-/* Zoom controls */
+.coords.copied {
+    animation: pulse 0.4s;
+    color: #69f0ae;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.world-selector {
+    position: absolute;
+    top: 16px;
+    left: 170px;
+    display: flex;
+    gap: 8px;
+    background: var(--bg-primary);
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-primary);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+}
+
+.world-btn {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--color-secondary);
+    font-family: "minecraft", sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.world-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.world-btn.active {
+    background: rgba(199, 74, 255, 0.3);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
 .leaflet-control-zoom {
-    background: rgba(26, 12, 32, 0.8);
-    border: 1px solid #5a3d7a;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
     border-radius: 8px;
     overflow: hidden;
-    backdrop-filter: blur(4px);
-}
-
-.leaflet-bar a.leaflet-control-zoom-out.leaflet-disabled {
-    background-color: rgba(26, 12, 32, 0.8);
-    color: #c74aff;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.leaflet-bar a.leaflet-control-zoom-in.leaflet-disabled {
-    background-color: rgba(26, 12, 32, 0.8);
-    color: #c74aff;
-    cursor: not-allowed;
-    opacity: 0.6;
+    backdrop-filter: blur(8px);
 }
 
 .leaflet-control-zoom a {
     background: transparent;
-    color: #c74aff;
+    color: var(--color-primary);
     width: 34px;
     height: 34px;
     line-height: 34px;
     font-size: 18px;
     font-weight: bold;
-    transition: all 0.2s ease;
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.leaflet-control-zoom a:last-child {
+    border-bottom: none;
 }
 
 .leaflet-control-zoom a:hover {
@@ -121,30 +176,257 @@ body,
     transform: scale(1.12);
 }
 
-/* Hide attribution */
-.leaflet-control-attribution {
-    display: none !important;
+.leaflet-bar a.leaflet-disabled {
+    cursor: default;
+    background-color: var(--bg-primary);
+    color: var(--color-primary);
 }
 
-/* Background glow */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(
-            circle at 30% 30%,
-            rgba(199, 74, 255, 0.06) 0%,
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 70% 70%,
-            rgba(255, 58, 110, 0.06) 0%,
-            transparent 25%
-        );
-    pointer-events: none;
-    z-index: -1;
+.player-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.player-marker-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.player-avatar {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--color-primary);
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.7);
+    background: rgba(0, 0, 0, 0.3);
+    image-rendering: pixelated;
+    display: block;
+    flex-shrink: 0;
+}
+
+.player-fallback {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 18px;
+    font-weight: bold;
+    background: rgba(26, 12, 32, 0.9);
+    border: 2px solid var(--color-primary);
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.7);
+}
+
+.player-nickname {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 4px rgba(0, 0, 0, 0.8);
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    backdrop-filter: blur(2px);
+}
+
+.leaflet-popup-content-wrapper {
+    background: rgba(10, 5, 15, 0.95) !important;
+    border: 1px solid var(--border-primary) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(8px);
+}
+
+.leaflet-popup-tip {
+    background: rgba(10, 5, 15, 0.95) !important;
+    border: 1px solid var(--border-primary) !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    font-family: "minecraft", sans-serif;
+}
+
+.player-popup {
+    font-family: "minecraft", sans-serif;
+    min-width: 200px;
+    color: var(--color-secondary);
+    padding: 12px;
+}
+
+.player-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.popup-avatar {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-primary);
+    border-radius: 3px;
+    image-rendering: pixelated;
+}
+
+.player-popup h3 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 16px;
+}
+
+.player-coords {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.coord-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(26, 12, 32, 0.6);
+    padding: 6px 8px;
+    border-radius: 4px;
+    gap: 4px;
+}
+
+.coord-label {
+    font-size: 11px;
+    color: #aaa;
+    font-weight: bold;
+}
+
+.coord-value {
+    font-size: 14px;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+    .logo {
+        top: 12px;
+        left: 12px;
+        font-size: 17px;
+        padding: 10px 14px;
+    }
+    
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .coords {
+        top: 12px;
+        left: auto;
+        right: 12px;
+        font-size: 16px;
+        padding: 10px 14px;
+    }
+    
+    .world-selector {
+        top: auto;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        padding: 10px 12px;
+        gap: 6px;
+        justify-content: center;
+    }
+    
+    .world-btn {
+        padding: 10px 14px;
+        font-size: 14px;
+        flex: 1;
+    }
+
+    .leaflet-control-zoom {
+        margin-right: 12px !important;
+        margin-bottom: 140px !important;
+    }
+
+    .leaflet-control-zoom a {
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 20px;
+    }
+    
+    .player-popup {
+        min-width: 180px;
+        font-size: 13px;
+    }
+    
+    .player-popup h3 {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        top: 10px;
+        left: 10px;
+        font-size: 15px;
+        padding: 8px 12px;
+    }
+    
+    .logo-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .coords {
+        top: 10px;
+        right: 10px;
+        font-size: 15px;
+        padding: 8px 12px;
+    }
+    
+    .world-selector {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 8px 10px;
+        gap: 4px;
+    }
+    
+    .world-btn {
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
+    .leaflet-control-zoom {
+        margin-right: 10px !important;
+        margin-bottom: 120px !important;
+    }
+
+    .leaflet-control-zoom a {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        font-size: 18px;
+    }
+    
+    .player-popup {
+        min-width: 160px;
+        font-size: 12px;
+    }
+    
+    .player-popup h3 {
+        font-size: 13px;
+    }
+    
+    .popup-avatar {
+        width: 28px;
+        height: 28px;
+    }
 }

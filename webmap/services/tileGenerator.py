@@ -1,32 +1,40 @@
+import json
+
 from pathlib import Path
 
 from PIL import Image, ImageEnhance
 
 from models.chunk import ChunkData, BlockData
+from core.config import WORLDS_DIR
 
 
 class TextureLoader:
     _texturePath = Path("assets/textures/blocks")
+    _failedTexturesFile = Path("data/failedTextures.json")
     
     def __init__(self):
         self._textureCache = {}
+        self._failedTextures = set()
         self._texturePath.mkdir(parents=True, exist_ok=True)
+        self._loadFailedTextures()
     
     def getTexture(self, block: BlockData) -> Image.Image:
         textureName = f"{block.name.removeprefix('minecraft:')}.png"
         textureFile = self._texturePath / textureName
-        
+
         if textureName not in self._textureCache:
             if textureFile.exists():
                 try:
                     self._textureCache[textureName] = Image.open(textureFile)
                 except:
                     self._textureCache[textureName] = self._getFallbackTexture()
+                    self._addFailedTexture(textureName)
             else:
                 self._textureCache[textureName] = self._getFallbackTexture()
+                self._addFailedTexture(textureName)
         
         return self._textureCache.get(textureName)
-    
+
     def _getFallbackTexture(self) -> Image.Image:
         fallbackPath = self._texturePath / "bug.png"
 
@@ -35,15 +43,32 @@ class TextureLoader:
         else:
             return Image.new("RGBA", (16, 16), (255, 0, 255, 255))
 
+    def _loadFailedTextures(self):
+        if self._failedTexturesFile.exists():
+            try:
+                with open(self._failedTexturesFile, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    self._failedTextures = set(data.get("textures", []))
+
+            except (json.JSONDecodeError, KeyError):
+                self._failedTextures = set()
+
+    def _addFailedTexture(self, texture_name: str):
+        if texture_name not in self._failedTextures:
+            self._failedTextures.add(texture_name)
+            self._saveFailedTextures()
+
+    def _saveFailedTextures(self):
+        data = {"textures": list(self._failedTextures)}
+        with open(self._failedTexturesFile, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
 
 class TileRenderer:
     def __init__(self):
         self._tileSize = 256
         self._blockSize = 16
-        self._tilesPath = Path("assets/tiles/zoom-4")
-
         self._textureLoader = TextureLoader()
-        self._tilesPath.mkdir(parents=True, exist_ok=True)
         
         self._minHeight = -64
         self._maxHeight = 320
@@ -54,6 +79,9 @@ class TileRenderer:
         heightMap = {}
         blockDataMap = {}
         blocks = chunk.blocks
+        
+        tilesPath = WORLDS_DIR / chunk.dimension / "tiles" / "zoom-4"
+        tilesPath.mkdir(parents=True, exist_ok=True)
 
         for block in blocks:
             tileX = (block.x * self._blockSize) // self._tileSize
@@ -64,7 +92,7 @@ class TileRenderer:
             tileBlockY = (block.z * self._blockSize) % self._tileSize
 
             if tileKey not in tileMap:
-                tilePath = self._tilesPath / f"({tileX})-({tileY}).png"
+                tilePath = tilesPath / f"({tileX})-({tileY}).png"
                 tileMap[tileKey] = self._loadTile(tilePath)
                 heightMap[tileKey] = {}
                 blockDataMap[tileKey] = {}
@@ -86,7 +114,7 @@ class TileRenderer:
                 
                 tileMap[tileKey].paste(heightTexture, blockKey)
 
-        self._saveTiles(tileMap)
+        self._saveTiles(tileMap, tilesPath)
 
     def _loadTile(self, tilePath: Path) -> Image.Image:
         if tilePath.exists():
@@ -190,25 +218,29 @@ class TileRenderer:
         return max(0.7, 1.0 - shadowFactor / len(lightDirection))
     
     def _addContourLine(self, texture: Image.Image) -> Image.Image:
-        contour = Image.new('RGBA', texture.size, (0, 0, 0, 30))
-        if texture.mode != 'RGBA':
-            texture = texture.convert('RGBA')
+        contour = Image.new("RGBA", texture.size, (0, 0, 0, 30))
+        if texture.mode != "RGBA":
+            texture = texture.convert("RGBA")
+            
         return Image.alpha_composite(texture, contour)
     
     def _adjustBrightness(self, image: Image.Image, factor: float) -> Image.Image:
+        if image.mode != "RGBA":
+            image = image.convert("RGBA")
+
         enhancer = ImageEnhance.Brightness(image)
         return enhancer.enhance(factor)
     
     def _addColorTint(self, image: Image.Image, tint_color: tuple) -> Image.Image:
-        tint = Image.new('RGBA', image.size, tint_color)
+        tint = Image.new("RGBA", image.size, tint_color)
         
-        if image.mode != 'RGBA':
-            image = image.convert('RGBA')
+        if image.mode != "RGBA":
+            image = image.convert("RGBA")
         
         return Image.alpha_composite(image, tint)
     
-    def _saveTiles(self, tileMap: dict) -> None:
+    def _saveTiles(self, tileMap: dict, tilesPath: Path) -> None:
         for tileKey, tileImage in tileMap.items():
             tileX, tileY = tileKey
-            tilePath = self._tilesPath / f"({tileX})-({tileY}).png"
+            tilePath = tilesPath / f"({tileX})-({tileY}).png"
             tileImage.save(tilePath)

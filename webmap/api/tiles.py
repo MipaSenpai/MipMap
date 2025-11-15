@@ -1,15 +1,16 @@
 from fastapi import APIRouter, HTTPException, Response
 
-from core.config import TILE_CACHE_MAX_AGE
+from core.config import TILE_CACHE_MAX_AGE, WORLDS_DIR
 
 
 router = APIRouter(prefix="/api", tags=["tiles"])
 
 
-@router.get("/tiles/{z}/{x}/{y}")
-async def getTile(z: int, x: int, y: int):
+@router.get("/tiles/{dimension}/{z}/{x}/{y}")
+async def getTile(dimension: str, z: int, x: int, y: int):
     try:
-        with open(f"assets/tiles/zoom-{z}/({x})-({y}).png", "rb") as f:
+        tilePath = WORLDS_DIR / dimension / "tiles" / f"zoom-{z}" / f"({x})-({y}).png"
+        with open(tilePath, "rb") as f:
             tileData = f.read()
 
     except FileNotFoundError:

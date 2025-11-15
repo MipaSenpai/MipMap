@@ -1,14 +1,17 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+from contextlib import asynccontextmanager
 
 from core.config import STATIC_DIR, TEMPLATES_DIR
 from core.logging import setupLogging
 
 from api.tiles import router as tilesRouter
 from api.chunks import router as chunksRouter, getTileManager
+from api.players import router as playersRouter
+from api.config import router as configRouter
+
 from services.zoomGenerator import ZoomManager
 
 
@@ -36,6 +39,8 @@ def createApp() -> FastAPI:
     
     app.include_router(tilesRouter)
     app.include_router(chunksRouter)
+    app.include_router(playersRouter)
+    app.include_router(configRouter)
     
     @app.get("/")
     async def home(request: Request):

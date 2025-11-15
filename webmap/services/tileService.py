@@ -3,7 +3,7 @@ import queue
 import multiprocessing as mp
 from multiprocessing import Queue, Process
 
-from services.tileGenerator import TileRenderer
+from .tileGenerator import TileRenderer
 
 
 def tileWorker(taskQueue):
