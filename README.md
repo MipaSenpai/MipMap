@@ -136,7 +136,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ### Plugin Settings
 
-Edit `plugins/endstone_mipmap/config.toml`:
+Edit `plugins/mipmap/config.toml`:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
