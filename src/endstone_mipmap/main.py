@@ -10,13 +10,19 @@ from .core import ChunksSender, PlayersSender, BatchTracker
 
 
 def startChunkSender(queue: mp.Queue, resultQueue: mp.Queue, config: dict) -> None:
-    sender = ChunksSender(config, resultQueue)
-    asyncio.run(sender.run(queue))
+    try:
+        sender = ChunksSender(config, resultQueue)
+        asyncio.run(sender.run(queue))
+    except KeyboardInterrupt:
+        return
 
 
 def startPlayersSender(queue: mp.Queue, config: dict) -> None:
-    sender = PlayersSender(config)
-    asyncio.run(sender.run(queue))
+    try:
+        sender = PlayersSender(config)
+        asyncio.run(sender.run(queue))
+    except KeyboardInterrupt:
+        return
 
 
 class Map(Plugin):
