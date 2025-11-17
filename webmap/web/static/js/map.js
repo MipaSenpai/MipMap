@@ -89,7 +89,7 @@ class MipMapViewer {
 
   handleMapClick(e) {
     const x = Math.round(e.latlng.lng);
-    const z = Math.round(e.latlng.lat);
+    const z = Math.round(-e.latlng.lat);
     this.elements.coords.textContent = `x: ${x}, z: ${z}`;
   }
 
@@ -158,7 +158,7 @@ class MipMapViewer {
       const marker = this.playerMarkers[player.name];
       
       if (marker) {
-        marker.setLatLng([player.z, player.x]);
+        marker.setLatLng([-player.z, player.x]);
         marker.playerData = player;
         
         if (marker.isPopupOpen()) {
@@ -212,7 +212,7 @@ class MipMapViewer {
       className: "player-icon",
     });
 
-    const marker = L.marker([player.z, player.x], { icon });
+    const marker = L.marker([-player.z, player.x], { icon });
     marker.playerData = player;
     marker.bindPopup(this.createPlayerPopup(player));
     
