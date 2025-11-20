@@ -13,7 +13,7 @@ authors = [
     { name = "Bebrowskiy" },
 ]
 
-description = "MipMap - Interactive Online Map for Endstone."
+description = "MipMap - Interactive Online Map for Endstone & LeviLamina.
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["endstone", "plugin", "online-map"]
