@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-mipmap"
-version = "1.0.2"
+version = "1.0.3"
 
 dependencies = ["aiohttp>=3.13.0"]
 
