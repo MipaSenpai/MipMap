@@ -15,7 +15,7 @@ playerManager = PlayerManager()
 
 @router.post("/players-data")
 async def receivePlayersData(playersData: PlayersRequest):
-    playerManager.updatePlayers(playersData)
+    await playerManager.updatePlayers(playersData)
     return {"status": "success", "message": "Players data received successfully"}
 
 
