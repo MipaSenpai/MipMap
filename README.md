@@ -91,6 +91,8 @@ One command. One container. Your map is live in seconds.
 
 Download the latest plugin file from [Releases](https://github.com/MipaSenpai/MipMap/releases) and place it in your Endstone server's `plugins` folder. Restart the server.
 
+**For LeviLamina**: You need to have [LeviStone](https://github.com/LiteLDev/LeviStone) installed.
+
 ---
 
 ### Step 2️⃣: Launch the Web Server
