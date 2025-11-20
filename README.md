@@ -4,7 +4,7 @@
 
 <h1 align="center">🗺️ MipMap</h1>
 <p align="center">
-  <strong>Interactive online map for Minecraft Bedrock servers powered by Endstone</strong>
+  <strong>Interactive online map for Minecraft Bedrock servers</strong>
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&pause=1000&color=8A2BE2&center=true&vCenter=true&width=600&lines=Watch+your+world+come+alive+in+real+time;From+Overworld+to+the+End;Every+chunk%2C+every+player%2C+every+moment;Built+for+Endstone.+Made+for+explorers." alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&pause=1000&color=8A2BE2&center=true&vCenter=true&width=600&lines=Watch+your+world+come+alive+in+real+time;From+Overworld+to+the+End;Every+chunk%2C+every+player%2C+every+moment;Built+for+Endstone+and+LeviLamina+Made+for+explorers." alt="Typing SVG" />
 </p>
 
 ---
@@ -44,7 +44,7 @@ MipMap transforms your Minecraft Bedrock server into a **living, breathing web m
 
 **Two parts. One vision:**
 
-🎮 **Endstone Plugin** — Captures chunk data as your world loads and streams it to the web  
+🎮 **Plugin** — Captures chunk data as your world loads and streams it to the web  
 🌐 **Web Server** — Generates beautiful map tiles and serves an interactive interface
 
 > 💜 **The map that grows with your world.**  
@@ -89,7 +89,7 @@ One command. One container. Your map is live in seconds.
 
 ### Step 1️⃣: Install the Plugin
 
-Download the latest plugin file from [Releases](https://github.com/MipaSenpai/MipMap/releases) and place it in your Endstone server's `plugins` folder. Restart the server.
+Download the latest plugin file from [Releases](https://github.com/MipaSenpai/MipMap/releases) and place it in your server's `plugins` folder. Restart the server.
 
 **For LeviLamina**: You need to have [LeviStone](https://github.com/LiteLDev/LeviStone) installed.
 
@@ -245,7 +245,6 @@ Receives player position data.
 ## 🛠️ Tech Stack
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Endstone-0.10+-7C83FD?style=for-the-badge&logoColor=white" />
   <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
   <img src="https://img.shields.io/badge/Pillow-8A2BE2?style=for-the-badge&logoColor=white" />
