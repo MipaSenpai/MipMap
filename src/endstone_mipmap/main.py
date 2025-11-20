@@ -148,6 +148,7 @@ class Map(Plugin):
                         
             players.append({
                 "name": player.name,
+                "xuid": player.xuid,
                 "skin": skin.tobytes().hex(),
                 "skinShape": list(skin.shape),
                 "dimension": player.dimension.name,
