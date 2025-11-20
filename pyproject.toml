@@ -6,13 +6,11 @@ build-backend = "hatchling.build"
 name = "endstone-mipmap"
 version = "1.0.2"
 
-dependencies = [
-    "aiohttp>=3.13.0"
-]
+dependencies = ["aiohttp>=3.13.0"]
 
 authors = [
-    { name = "Mipa"},
-    {name = "Bebrowskiy" },
+    { name = "Mipa" },
+    { name = "Bebrowskiy" },
 ]
 
 description = "MipMap - Interactive Online Map for Endstone."
